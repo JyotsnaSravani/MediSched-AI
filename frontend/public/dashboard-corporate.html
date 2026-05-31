@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        /* Page-specific styles */
+        .welcome-banner {
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+            padding: var(--space-8);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-8);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .welcome-title {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            margin-bottom: var(--space-2);
+            color: white;
+        }
+        
+        .welcome-subtitle {
+            font-size: var(--text-lg);
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-8);
+        }
+        
+        .quick-action-btn {
+            background: white;
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--gray-200);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            color: var(--gray-900);
+        }
+        
+        .quick-action-btn:hover {
+            border-color: var(--primary-500);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            text-decoration: none;
+        }
+        
+        .quick-action-icon {
+            font-size: var(--text-4xl);
+            margin-bottom: var(--space-3);
+        }
+        
+        .quick-action-label {
+            font-weight: 600;
+            font-size: var(--text-sm);
+        }
+        
+        .activity-feed {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .activity-item {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            gap: var(--space-4);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .activity-icon.success {
+            background: var(--success-light);
+            color: var(--success);
+        }
+        
+        .activity-icon.info {
+            background: var(--info-light);
+            color: var(--info);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-1);
+        }
+        
+        .activity-time {
+            font-size: var(--text-xs);
+            color: var(--gray-600);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏥</div>
+                <div>
+                    <h1 class="sidebar-title">MediSched</h1>
+                    <p class="sidebar-subtitle">AI-Powered Scheduling</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard-corporate.html" class="nav-item active">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/calendar-corporate.html" class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/appointments-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Appointments</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="/patients-corporate.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span>Patients</span>
+                </a>
+                <a href="/doctors-corporate.html" class="nav-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Doctors</span>
+                </a>
+                <a href="/slots-corporate.html" class="nav-item">
+                    <span class="nav-icon">🕐</span>
+                    <span>Availability</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Communication</div>
+                <a href="/test-sms.html" class="nav-item">
+                    <span class="nav-icon">📱</span>
+                    <span>SMS Messages</span>
+                </a>
+                <a href="/call-logs-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Call Logs</span>
+                </a>
+                <a href="/reminders-corporate.html" class="nav-item">
+                    <span class="nav-icon">📧</span>
+                    <span>Reminders</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/analytics-corporate.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h2 class="top-bar-title">Dashboard</h2>
+            <div class="top-bar-actions">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Welcome Banner -->
+            <div class="welcome-banner">
+                <h1 class="welcome-title">Welcome back, <span id="welcomeName">User</span>! 👋</h1>
+                <p class="welcome-subtitle">Here's what's happening with your clinic today</p>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="statDoctors">0</div>
+                            <div class="stat-label">Active Doctors</div>
+                        </div>
+                        <div class="stat-icon">👨‍⚕️</div>
+                    </div>
+                    <div class="stat-change positive">↑ Currently available</div>
+                </div>
+                
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="statPatients">0</div>
+                            <div class="stat-label">Total Patients</div>
+                        </div>
+                        <div class="stat-icon">👥</div>
+                    </div>
+                    <div class="stat-change positive">↑ Growing patient base</div>
+                </div>
+                
+                <div class="stat-card warning">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="statSlots">0</div>
+                            <div class="stat-label">Available Slots</div>
+                        </div>
+                        <div class="stat-icon">🕐</div>
+                    </div>
+                    <div class="stat-change">Ready for booking</div>
+                </div>
+                
+                <div class="stat-card info">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="statAppointments">0</div>
+                            <div class="stat-label">Appointments</div>
+                        </div>
+                        <div class="stat-icon">📅</div>
+                    </div>
+                    <div class="stat-change positive">↑ Scheduled today</div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card mb-8">
+                <div class="card-header">
+                    <h3 class="card-title">Quick Actions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <a href="/patients-corporate.html" class="quick-action-btn">
+                            <div class="quick-action-icon">➕</div>
+                            <div class="quick-action-label">Add Patient</div>
+                        </a>
+                        <a href="/calendar-corporate.html" class="quick-action-btn">
+                            <div class="quick-action-icon">📅</div>
+                            <div class="quick-action-label">Book Appointment</div>
+                        </a>
+                        <a href="/appointments-corporate.html" class="quick-action-btn">
+                            <div class="quick-action-icon">📋</div>
+                            <div class="quick-action-label">View Appointments</div>
+                        </a>
+                        <a href="/slots-corporate.html" class="quick-action-btn">
+                            <div class="quick-action-icon">🕐</div>
+                            <div class="quick-action-label">Manage Slots</div>
+                        </a>
+                        <a href="/call-logs-corporate.html" class="quick-action-btn">
+                            <div class="quick-action-icon">📞</div>
+                            <div class="quick-action-label">Call Patient</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Status & Recent Activity -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+                <!-- System Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">System Status</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-success">
+                            <div class="alert-icon">✅</div>
+                            <div class="alert-content">
+                                <div class="alert-title">All Systems Operational</div>
+                                <p class="alert-message">Backend, frontend, and AI calling system are running smoothly.</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: var(--text-sm); color: var(--gray-700);">Backend API</span>
+                                <span class="badge badge-success">Online</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: var(--text-sm); color: var(--gray-700);">Database</span>
+                                <span class="badge badge-success">Connected</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: var(--text-sm); color: var(--gray-700);">AI Calling</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: var(--text-sm); color: var(--gray-700);">Real-time Updates</span>
+                                <span class="badge badge-success">Enabled</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Activity</h3>
+                    </div>
+                    <div class="activity-feed">
+                        <div class="activity-item">
+                            <div class="activity-icon success">✓</div>
+                            <div class="activity-content">
+                                <div class="activity-title">System initialized successfully</div>
+                                <div class="activity-time">Just now</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon info">📊</div>
+                            <div class="activity-content">
+                                <div class="activity-title">Dashboard loaded</div>
+                                <div class="activity-time">A moment ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon success">👤</div>
+                            <div class="activity-content">
+                                <div class="activity-title">User logged in</div>
+                                <div class="activity-time">Today</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Check authentication
+        const token = localStorage.getItem('access_token');
+        const user = localStorage.getItem('user');
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        } else {
+            // Display user info
+            if (user) {
+                const userData = JSON.parse(user);
+                const firstName = userData.email.split('@')[0].split('.')[0];
+                const initials = firstName.substring(0, 2).toUpperCase();
+                
+                document.getElementById('userName').textContent = userData.email;
+                document.getElementById('userRole').textContent = userData.role;
+                document.getElementById('userAvatar').textContent = initials;
+                document.getElementById('welcomeName').textContent = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+            }
+        }
+        
+        // Load statistics
+        async function loadStats() {
+            try {
+                // Fetch doctors
+                const doctorsRes = await authenticatedFetch('http://127.0.0.1:8000/api/v1/doctors/');
+                const doctorsData = await doctorsRes.json();
+                const doctors = doctorsData.results || doctorsData;
+                
+                // Filter only ACTIVE doctors
+                const activeDoctors = doctors.filter(d => d.status === 'ACTIVE');
+                document.getElementById('statDoctors').textContent = activeDoctors.length;
+                
+                // Fetch patients
+                const patientsRes = await authenticatedFetch('http://127.0.0.1:8000/api/v1/patients/');
+                const patientsData = await patientsRes.json();
+                const patients = patientsData.results || patientsData;
+                document.getElementById('statPatients').textContent = patients.length;
+                
+                // Count total slots from active doctors only
+                let totalSlots = 0;
+                for (const doctor of activeDoctors) {
+                    try {
+                        const slotsRes = await authenticatedFetch(`http://127.0.0.1:8000/api/v1/doctors/${doctor.id}/slots/`);
+                        const slotsData = await slotsRes.json();
+                        const slots = slotsData.results || slotsData;
+                        totalSlots += slots.filter(s => s.status === 'AVAILABLE').length;
+                    } catch (e) {}
+                }
+                document.getElementById('statSlots').textContent = totalSlots;
+                
+                // Appointments (placeholder)
+                document.getElementById('statAppointments').textContent = '15';
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Load stats on page load
+        loadStats();
+        
+        console.log('✅ Corporate dashboard loaded successfully');
+    </script>
+</body>
+</html>

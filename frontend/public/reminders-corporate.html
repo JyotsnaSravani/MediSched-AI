@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminders - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <script src="/js/auth-utils.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏥</div>
+                <div>
+                    <h1 class="sidebar-title">MediSched</h1>
+                    <p class="sidebar-subtitle">AI-Powered Scheduling</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard-corporate.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/calendar-corporate.html" class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/appointments-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Appointments</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="/patients-corporate.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span>Patients</span>
+                </a>
+                <a href="/doctors-corporate.html" class="nav-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Doctors</span>
+                </a>
+                <a href="/slots-corporate.html" class="nav-item">
+                    <span class="nav-icon">🕐</span>
+                    <span>Availability</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Communication</div>
+                <a href="/test-sms.html" class="nav-item">
+                    <span class="nav-icon">📱</span>
+                    <span>SMS Messages</span>
+                </a>
+                <a href="/call-logs-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Call Logs</span>
+                </a>
+                <a href="/reminders-corporate.html" class="nav-item active">
+                    <span class="nav-icon">📧</span>
+                    <span>Reminders</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/analytics-corporate.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h2 class="top-bar-title">Reminders</h2>
+            <div class="top-bar-actions">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Stats Grid -->
+            <div class="stats-grid mb-8">
+                <div class="stat-card primary">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="totalReminders">0</div>
+                            <div class="stat-label">Total Reminders</div>
+                        </div>
+                        <div class="stat-icon">📧</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="sentReminders">0</div>
+                            <div class="stat-label">Sent</div>
+                        </div>
+                        <div class="stat-icon">✅</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card danger">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="failedReminders">0</div>
+                            <div class="stat-label">Failed</div>
+                        </div>
+                        <div class="stat-icon">❌</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card warning">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="pendingReminders">0</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                        <div class="stat-icon">⏳</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="remindersContainer">
+                <div style="text-align: center; padding: var(--space-12); color: var(--gray-600);">
+                    Loading reminders...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const token = localStorage.getItem('access_token');
+        const user = localStorage.getItem('user');
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        } else {
+            if (user) {
+                const userData = JSON.parse(user);
+                const firstName = userData.email.split('@')[0].split('.')[0];
+                const initials = firstName.substring(0, 2).toUpperCase();
+                
+                document.getElementById('userName').textContent = userData.email;
+                document.getElementById('userRole').textContent = userData.role;
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+        
+        async function loadReminders() {
+            try {
+                const response = await authenticatedFetch('http://127.0.0.1:8000/api/v1/reminders/');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const reminders = data.results || data;
+                
+                if (!reminders || reminders.length === 0) {
+                    document.getElementById('totalReminders').textContent = '0';
+                    document.getElementById('sentReminders').textContent = '0';
+                    document.getElementById('failedReminders').textContent = '0';
+                    document.getElementById('pendingReminders').textContent = '0';
+                    
+                    document.getElementById('remindersContainer').innerHTML = `
+                        <div class="card">
+                            <div class="card-body" style="text-align: center; padding: var(--space-12);">
+                                <div style="font-size: 64px; margin-bottom: var(--space-4);">📧</div>
+                                <h3 style="margin-bottom: var(--space-2);">No Reminders Found</h3>
+                                <p style="color: var(--gray-600);">No reminders have been sent yet. Reminders will appear here once the system sends them.</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Update stats
+                document.getElementById('totalReminders').textContent = reminders.length;
+                document.getElementById('sentReminders').textContent = reminders.filter(r => r.status === 'SENT').length;
+                document.getElementById('failedReminders').textContent = reminders.filter(r => r.status === 'FAILED').length;
+                document.getElementById('pendingReminders').textContent = reminders.filter(r => r.status === 'PENDING').length;
+                
+                const getStatusBadge = (status) => {
+                    const badges = {
+                        'SENT': 'success',
+                        'FAILED': 'danger',
+                        'PENDING': 'warning'
+                    };
+                    return badges[status] || 'warning';
+                };
+                
+                const html = `
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Patient</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Channel</th>
+                                    <th>Scheduled</th>
+                                    <th>Sent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${reminders.map(r => `
+                                    <tr>
+                                        <td><span class="badge badge-gray">#${r.id}</span></td>
+                                        <td><strong>${r.patient_name || 'N/A'}</strong></td>
+                                        <td>${r.reminder_type || 'N/A'}</td>
+                                        <td><span class="badge badge-${getStatusBadge(r.status)}">${r.status}</span></td>
+                                        <td>${r.channel || 'N/A'}</td>
+                                        <td>${r.scheduled_at ? new Date(r.scheduled_at).toLocaleString() : 'N/A'}</td>
+                                        <td>${r.sent_at ? new Date(r.sent_at).toLocaleString() : 'Not sent'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                document.getElementById('remindersContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('remindersContainer').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Error Loading Reminders</div>
+                            <p class="alert-message">${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login.html';
+            }
+        }
+        
+        loadReminders();
+        console.log('✅ Corporate reminders page loaded');
+    </script>
+</body>
+</html>

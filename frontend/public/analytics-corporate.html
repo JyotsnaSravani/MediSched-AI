@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <script src="/js/auth-utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+        
+        .chart-card {
+            background: white;
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .chart-title {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .export-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+            margin-top: var(--space-6);
+        }
+        
+        .export-card {
+            background: white;
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+        
+        .export-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .export-icon {
+            font-size: 40px;
+            margin-bottom: var(--space-3);
+        }
+        
+        .export-title {
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+        
+        .export-description {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            margin-bottom: var(--space-3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏥</div>
+                <div>
+                    <h1 class="sidebar-title">MediSched</h1>
+                    <p class="sidebar-subtitle">AI-Powered Scheduling</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard-corporate.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/calendar-corporate.html" class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/appointments-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Appointments</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="/patients-corporate.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span>Patients</span>
+                </a>
+                <a href="/doctors-corporate.html" class="nav-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Doctors</span>
+                </a>
+                <a href="/slots-corporate.html" class="nav-item">
+                    <span class="nav-icon">🕐</span>
+                    <span>Availability</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Communication</div>
+                <a href="/test-sms.html" class="nav-item">
+                    <span class="nav-icon">📱</span>
+                    <span>SMS Messages</span>
+                </a>
+                <a href="/call-logs-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Call Logs</span>
+                </a>
+                <a href="/reminders-corporate.html" class="nav-item">
+                    <span class="nav-icon">📧</span>
+                    <span>Reminders</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/analytics-corporate.html" class="nav-item active">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h2 class="top-bar-title">Analytics</h2>
+            <div class="top-bar-actions">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="card mb-8">
+                <div class="card-body">
+                    <h3 style="color: var(--primary-700); margin-bottom: var(--space-2);">📊 Analytics Dashboard</h3>
+                    <p style="color: var(--gray-600); margin: 0;">View system statistics and export data for analysis.</p>
+                </div>
+            </div>
+            
+            <!-- Charts Section -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <span>📅</span>
+                        <span>Appointments Overview</span>
+                    </div>
+                    <canvas id="appointmentsChart"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <span>📞</span>
+                        <span>Call Outcomes</span>
+                    </div>
+                    <canvas id="callsChart"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <span>👨‍⚕️</span>
+                        <span>Doctor Utilization</span>
+                    </div>
+                    <canvas id="doctorsChart"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <span>📊</span>
+                        <span>Slot Utilization</span>
+                    </div>
+                    <canvas id="slotsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📥 Export Data</h3>
+                </div>
+                <div class="card-body">
+                    <div class="export-grid">
+                        <div class="export-card">
+                            <div class="export-icon">📅</div>
+                            <div class="export-title">Appointments</div>
+                            <div class="export-description">Export all appointment records with patient and doctor details</div>
+                            <button class="btn btn-primary" onclick="exportData('appointments')">
+                                <span>📥</span>
+                                <span>Export</span>
+                            </button>
+                        </div>
+                        
+                        <div class="export-card">
+                            <div class="export-icon">👥</div>
+                            <div class="export-title">Patients</div>
+                            <div class="export-description">Export patient database with contact information</div>
+                            <button class="btn btn-primary" onclick="exportData('patients')">
+                                <span>📥</span>
+                                <span>Export</span>
+                            </button>
+                        </div>
+                        
+                        <div class="export-card">
+                            <div class="export-icon">👨‍⚕️</div>
+                            <div class="export-title">Doctors</div>
+                            <div class="export-description">Export doctor profiles and specializations</div>
+                            <button class="btn btn-primary" onclick="exportData('doctors')">
+                                <span>📥</span>
+                                <span>Export</span>
+                            </button>
+                        </div>
+                        
+                        <div class="export-card">
+                            <div class="export-icon">🕐</div>
+                            <div class="export-title">Call Logs</div>
+                            <div class="export-description">Export AI calling system logs and outcomes</div>
+                            <button class="btn btn-primary" onclick="exportData('call-logs')">
+                                <span>📥</span>
+                                <span>Export</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const token = localStorage.getItem('access_token');
+        const user = localStorage.getItem('user');
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        } else {
+            if (user) {
+                const userData = JSON.parse(user);
+                const firstName = userData.email.split('@')[0].split('.')[0];
+                const initials = firstName.substring(0, 2).toUpperCase();
+                
+                document.getElementById('userName').textContent = userData.email;
+                document.getElementById('userRole').textContent = userData.role;
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+        
+        function exportData(type) {
+            const url = `http://127.0.0.1:8000/api/v1/analytics/export/${type}/`;
+            
+            // Use authenticated fetch
+            authenticatedFetch(url)
+            .then(response => response.blob())
+            .then(blob => {
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `${type}-export-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+                
+                // Show success message
+                alert(`✅ ${type.charAt(0).toUpperCase() + type.slice(1)} data exported successfully!`);
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                alert(`❌ Error exporting ${type} data. Please try again.`);
+            });
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Load analytics data and create charts
+        let appointmentsChart, callsChart, doctorsChart, slotsChart;
+        
+        async function loadAnalytics() {
+            try {
+                // Fetch dashboard stats
+                const statsResponse = await authenticatedFetch('http://127.0.0.1:8000/api/v1/analytics/dashboard/');
+                
+                if (!statsResponse.ok) {
+                    throw new Error('Failed to load analytics data');
+                }
+                
+                const stats = await statsResponse.json();
+                
+                // Create charts
+                createAppointmentsChart(stats.appointments);
+                createCallsChart(stats.calls);
+                createDoctorsChart(stats.doctors);
+                createSlotsChart(stats.slots);
+                
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+        
+        function createAppointmentsChart(data) {
+            const ctx = document.getElementById('appointmentsChart').getContext('2d');
+            
+            if (appointmentsChart) {
+                appointmentsChart.destroy();
+            }
+            
+            appointmentsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Confirmed', 'Completed', 'Cancelled', 'No Shows'],
+                    datasets: [{
+                        data: [
+                            data.confirmed || 0,
+                            data.completed || 0,
+                            data.cancelled || 0,
+                            data.no_shows || 0
+                        ],
+                        backgroundColor: [
+                            '#0891b2', // teal-600
+                            '#10b981', // green-500
+                            '#f59e0b', // amber-500
+                            '#ef4444'  // red-500
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createCallsChart(data) {
+            const ctx = document.getElementById('callsChart').getContext('2d');
+            
+            if (callsChart) {
+                callsChart.destroy();
+            }
+            
+            callsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Completed', 'Answered', 'No Answer', 'Failed'],
+                    datasets: [{
+                        label: 'Call Count',
+                        data: [
+                            data.completed || 0,
+                            data.answered || 0,
+                            data.no_answer || 0,
+                            data.failed || 0
+                        ],
+                        backgroundColor: [
+                            '#10b981', // green-500
+                            '#0891b2', // teal-600
+                            '#f59e0b', // amber-500
+                            '#ef4444'  // red-500
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const successRate = data.success_rate || 0;
+                                    if (context.dataIndex === 0 || context.dataIndex === 1) {
+                                        return `Success Rate: ${successRate}%`;
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createDoctorsChart(doctors) {
+            const ctx = document.getElementById('doctorsChart').getContext('2d');
+            
+            if (doctorsChart) {
+                doctorsChart.destroy();
+            }
+            
+            // Take top 5 doctors by utilization
+            const topDoctors = doctors.slice(0, 5);
+            
+            doctorsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: topDoctors.map(d => d.doctor_name.split(' ')[0]), // First name only
+                    datasets: [{
+                        label: 'Utilization Rate (%)',
+                        data: topDoctors.map(d => d.utilization_rate || 0),
+                        backgroundColor: '#0891b2',
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const doctor = topDoctors[context.dataIndex];
+                                    return [
+                                        `Utilization: ${context.parsed.x.toFixed(1)}%`,
+                                        `Booked: ${doctor.booked_slots}/${doctor.total_slots} slots`,
+                                        `Appointments: ${doctor.total_appointments}`,
+                                        `No Shows: ${doctor.no_shows}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createSlotsChart(data) {
+            const ctx = document.getElementById('slotsChart').getContext('2d');
+            
+            if (slotsChart) {
+                slotsChart.destroy();
+            }
+            
+            slotsChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Booked', 'Available', 'Blocked'],
+                    datasets: [{
+                        data: [
+                            data.booked || 0,
+                            data.available || 0,
+                            data.blocked || 0
+                        ],
+                        backgroundColor: [
+                            '#0891b2', // teal-600
+                            '#10b981', // green-500
+                            '#6b7280'  // gray-500
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}%)`;
+                                },
+                                afterLabel: function(context) {
+                                    if (context.dataIndex === 0) {
+                                        const utilizationRate = data.utilization_rate || 0;
+                                        return `Utilization: ${utilizationRate}%`;
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Load analytics on page load
+        loadAnalytics();
+        
+        console.log('✅ Corporate analytics page loaded');
+    </script>
+</body>
+</html>

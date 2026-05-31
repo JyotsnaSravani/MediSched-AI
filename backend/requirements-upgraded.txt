@@ -1,0 +1,61 @@
+# UPGRADED REQUIREMENTS - MediSched AI v2.0
+# Security patches and performance improvements applied
+
+# Django Core (SECURITY UPDATE)
+Django==5.2.13  # ← UPGRADED from 5.0.3 (Critical CVE fixes)
+djangorestframework==3.15.2  # ← UPGRADED
+djangorestframework-simplejwt==5.3.1
+
+# Database
+psycopg2-binary==2.9.9
+dj-database-url==2.1.0
+
+# Celery & Redis (UPGRADED)
+celery==5.4.0  # ← UPGRADED from 5.3.6
+redis==5.0.4  # ← UPGRADED from 5.0.3
+django-redis==5.4.0  # ← NEW (Caching support)
+
+# Django Channels (WebSocket) - UPGRADED
+channels==4.1.0  # ← UPGRADED from 4.0.0
+channels-redis==4.2.0
+daphne==4.1.2  # ← UPGRADED from 4.1.0
+
+# API Documentation
+drf-spectacular==0.27.2  # ← UPGRADED
+
+# Filtering & Search
+django-filter==24.2  # ← UPGRADED
+
+# CORS
+django-cors-headers==4.3.1
+
+# Environment Variables
+python-decouple==3.8
+
+# Testing
+pytest==8.2.0  # ← UPGRADED
+pytest-django==4.8.0
+pytest-cov==5.0.0  # ← UPGRADED
+factory-boy==3.3.0
+
+# Code Quality
+black==24.4.0  # ← UPGRADED
+flake8==7.0.0
+isort==5.13.2
+
+# Twilio (UPGRADED)
+twilio==9.1.0  # ← UPGRADED from 9.0.4
+
+# OpenAI (UPGRADED)
+openai==1.30.0  # ← UPGRADED from 1.14.3
+
+# Monitoring & Error Tracking (NEW)
+sentry-sdk==2.0.0  # ← NEW
+
+# Utilities
+python-dateutil==2.9.0
+pytz==2024.1
+
+# Security
+django-ratelimit==4.1.0  # ← NEW (Rate limiting)
+

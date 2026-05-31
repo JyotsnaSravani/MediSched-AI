@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recording Test - Call #195</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        audio { width: 100%; margin: 20px 0; }
+        .info { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>Call Recording Test</h1>
+    
+    <div class="info">
+        <h2>Call Information</h2>
+        <p><strong>Call ID:</strong> 195</p>
+        <p><strong>Patient:</strong> Venkatesh</p>
+        <p><strong>Status:</strong> COMPLETED</p>
+    </div>
+    
+    <h2>Recording Player</h2>
+    <audio controls preload="metadata" id="player">
+        <source src="/api/v1/calling/logs/195/recording/" type="audio/mpeg">
+        Your browser does not support audio.
+    </audio>
+    
+    <div id="status"></div>
+    
+    <h2>Direct Test</h2>
+    <p><a href="/api/v1/calling/logs/195/recording/" target="_blank">
+        Click here to open recording in new tab
+    </a></p>
+    
+    <script>
+        const player = document.getElementById('player');
+        const status = document.getElementById('status');
+        
+        player.addEventListener('loadstart', () => {
+            status.innerHTML = '<p>Loading recording...</p>';
+        });
+        
+        player.addEventListener('loadedmetadata', () => {
+            const duration = Math.round(player.duration);
+            status.innerHTML = '<p class="success">SUCCESS! Recording loaded. Duration: ' + duration + ' seconds</p>';
+            console.log('Recording loaded successfully');
+        });
+        
+        player.addEventListener('canplay', () => {
+            console.log('Recording ready to play');
+        });
+        
+        player.addEventListener('error', (e) => {
+            const errorMsg = player.error ? player.error.message : 'Unknown error';
+            status.innerHTML = '<p class="error">ERROR: ' + errorMsg + '</p>';
+            console.error('Recording error:', player.error);
+        });
+    </script>
+</body>
+</html>

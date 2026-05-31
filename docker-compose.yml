@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: medisched-postgres
+    environment:
+      POSTGRES_DB: medisched_db
+      POSTGRES_USER: medisched_user
+      POSTGRES_PASSWORD: medisched_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medisched_user -d medisched_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: medisched-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass medisched_redis_pass
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  django-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medisched-django
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://medisched_user:medisched_pass@postgres:5432/medisched_db
+      - REDIS_URL=redis://:medisched_redis_pass@redis:6379/0
+      - DJANGO_SECRET_KEY=dev-secret-key-change-in-production
+      - DJANGO_DEBUG=True
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,django-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medisched-celery
+    command: celery -A config worker -l info -Q calling_queue,transcription_queue,reminder_queue
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://medisched_user:medisched_pass@postgres:5432/medisched_db
+      - REDIS_URL=redis://:medisched_redis_pass@redis:6379/0
+      - DJANGO_SECRET_KEY=dev-secret-key-change-in-production
+    depends_on:
+      - postgres
+      - redis
+      - django-api
+
+  react-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: medisched-react
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+      - VITE_WS_URL=ws://localhost:8000/ws
+    depends_on:
+      - django-api
+
+volumes:
+  postgres_data:

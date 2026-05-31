@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #7B1FA2 0%, #4A148C 50%, #9C27B0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: var(--space-6);
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .login-card {
+            background: white;
+            padding: var(--space-10);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+        }
+        
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #7B1FA2 0%, #4A148C 100%);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-4xl);
+            margin: 0 auto var(--space-4);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .login-title {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+        
+        .login-subtitle {
+            font-size: var(--text-base);
+            color: var(--gray-600);
+            margin: 0;
+        }
+        
+        .login-welcome {
+            font-size: var(--text-xl);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+        
+        .login-welcome-text {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            margin-bottom: var(--space-6);
+        }
+        
+        .demo-credentials {
+            background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--primary-200);
+            margin-top: var(--space-6);
+        }
+        
+        .demo-title {
+            font-size: var(--text-xs);
+            font-weight: 700;
+            color: var(--primary-800);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--space-3);
+        }
+        
+        .demo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-2);
+        }
+        
+        .demo-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .demo-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .demo-value {
+            font-family: var(--font-family-mono);
+            background: white;
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-sm);
+            color: var(--primary-700);
+            font-weight: 600;
+            font-size: var(--text-xs);
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: var(--space-6);
+            font-size: var(--text-xs);
+            color: var(--gray-600);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: var(--space-4);
+            font-size: var(--text-base);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">🏥</div>
+                <h1 class="login-title">MediSched AI</h1>
+                <p class="login-subtitle">AI-Powered Healthcare Scheduling</p>
+            </div>
+            
+            <div>
+                <h2 class="login-welcome">Welcome Back</h2>
+                <p class="login-welcome-text">Sign in to access your dashboard</p>
+            </div>
+            
+            <div id="messageContainer"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email" class="form-label form-label-required">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-input"
+                        placeholder="Enter your email"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label form-label-required">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+                
+                <button type="submit" id="submitBtn" class="btn btn-primary btn-login">
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="demo-credentials">
+                <div class="demo-title">Demo Credentials</div>
+                <div class="demo-item">
+                    <span class="demo-label">Email:</span>
+                    <span class="demo-value">admin@medisched.com</span>
+                </div>
+                <div class="demo-item">
+                    <span class="demo-label">Password:</span>
+                    <span class="demo-value">admin123</span>
+                </div>
+            </div>
+            
+            <div class="login-footer">
+                © 2026 MediSched AI. All rights reserved.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageContainer = document.getElementById('messageContainer');
+        
+        // Check if already logged in
+        if (localStorage.getItem('access_token')) {
+            messageContainer.innerHTML = `
+                <div class="alert alert-success">
+                    <div class="alert-icon">✅</div>
+                    <div class="alert-content">
+                        <div class="alert-title">Already Logged In</div>
+                        <p class="alert-message">Redirecting to dashboard...</p>
+                    </div>
+                </div>
+            `;
+            setTimeout(() => {
+                window.location.href = '/dashboard-corporate.html';
+            }, 500);
+        }
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing In...';
+            messageContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/auth/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned an invalid response. Please check if the backend is running at http://localhost:8000');
+                }
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store tokens
+                    localStorage.setItem('access_token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Show success
+                    messageContainer.innerHTML = `
+                        <div class="alert alert-success">
+                            <div class="alert-icon">✅</div>
+                            <div class="alert-content">
+                                <div class="alert-title">Login Successful</div>
+                                <p class="alert-message">Redirecting to dashboard...</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard-corporate.html';
+                    }, 500);
+                } else {
+                    throw new Error(data.detail || data.message || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                messageContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Login Failed</div>
+                            <p class="alert-message">${error.message}</p>
+                        </div>
+                    </div>
+                `;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign In';
+            }
+        });
+        
+        console.log('✅ Corporate login page loaded');
+    </script>
+</body>
+</html>

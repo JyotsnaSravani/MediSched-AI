@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Messages - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <script src="/js/auth-utils.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏥</div>
+                <div>
+                    <h1 class="sidebar-title">MediSched</h1>
+                    <p class="sidebar-subtitle">AI-Powered Scheduling</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard-corporate.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/calendar-corporate.html" class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/appointments-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Appointments</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="/patients-corporate.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span>Patients</span>
+                </a>
+                <a href="/doctors-corporate.html" class="nav-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Doctors</span>
+                </a>
+                <a href="/slots-corporate.html" class="nav-item">
+                    <span class="nav-icon">🕐</span>
+                    <span>Availability</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Communication</div>
+                <a href="/test-sms.html" class="nav-item active">
+                    <span class="nav-icon">📱</span>
+                    <span>SMS Messages</span>
+                </a>
+                <a href="/call-logs-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Call Logs</span>
+                </a>
+                <a href="/reminders-corporate.html" class="nav-item">
+                    <span class="nav-icon">📧</span>
+                    <span>Reminders</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/analytics-corporate.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h2 class="top-bar-title">SMS Messages</h2>
+            <div class="top-bar-actions">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="card">
+                <div class="card-body">
+                    <div id="messageContainer"></div>
+        
+        <div class="form-group">
+            <label for="patientSelect" class="form-label">Select Patient</label>
+            <select id="patientSelect" class="form-input">
+                <option value="">Loading patients...</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="messageType" class="form-label">Message Type</label>
+            <select id="messageType" class="form-input" onchange="updateMessageTemplate()">
+                <option value="GENERAL">General Message</option>
+                <option value="APPOINTMENT_REMINDER">Appointment Reminder</option>
+                <option value="APPOINTMENT_CONFIRMATION">Appointment Confirmation</option>
+                <option value="APPOINTMENT_CANCELLED">Appointment Cancelled</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="messageBody" class="form-label">Message</label>
+            <textarea id="messageBody" class="form-input" rows="5" maxlength="1600" 
+                placeholder="Type your message here..." oninput="updateCharCount()"></textarea>
+            <div class="char-count">
+                <span id="charCount">0</span> / 1600 characters
+            </div>
+        </div>
+        
+        <button id="sendButton" class="btn btn-primary send-button" onclick="sendSMS()">
+            📱 Send SMS
+        </button>
+        
+        <div id="resultBox" class="result-box"></div>
+        
+                    <h3 style="margin-bottom: var(--space-4); margin-top: var(--space-6);">Recent SMS Logs</h3>
+                    <div id="smsLogsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const token = localStorage.getItem('access_token');
+        const user = localStorage.getItem('user');
+        
+        if (!token) {
+            window.location.href = '/login-corporate.html';
+        } else {
+            if (user) {
+                const userData = JSON.parse(user);
+                const firstName = userData.email.split('@')[0].split('.')[0];
+                const initials = firstName.substring(0, 2).toUpperCase();
+                
+                document.getElementById('userName').textContent = userData.email;
+                document.getElementById('userRole').textContent = userData.role;
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login-corporate.html';
+            }
+        }
+        
+        let patients = [];
+        
+        // Message templates
+        const templates = {
+            'GENERAL': 'Hello! This is a message from MediSched AI.',
+            'APPOINTMENT_REMINDER': 'Reminder: You have an appointment tomorrow at [TIME]. Please arrive 10 minutes early. Reply CONFIRM to confirm.',
+            'APPOINTMENT_CONFIRMATION': 'Your appointment has been confirmed for [DATE] at [TIME]. We look forward to seeing you!',
+            'APPOINTMENT_CANCELLED': 'Your appointment scheduled for [DATE] at [TIME] has been cancelled. Please call us to reschedule.'
+        };
+        
+        // Load patients
+        async function loadPatients() {
+            const token = localStorage.getItem('access_token');
+            
+            if (!token) {
+                window.location.href = '/login-corporate.html';
+                return;
+            }
+            
+            try {
+                const response = await authenticatedFetch('http://localhost:8000/api/v1/patients/');
+                
+                const data = await response.json();
+                patients = Array.isArray(data) ? data : (data.results || []);
+                
+                const select = document.getElementById('patientSelect');
+                select.innerHTML = '<option value="">-- Select a patient --</option>';
+                
+                if (patients.length === 0) {
+                    select.innerHTML = '<option value="">No patients found</option>';
+                    return;
+                }
+                
+                patients.forEach(patient => {
+                    const option = document.createElement('option');
+                    option.value = patient.id;
+                    option.textContent = `${patient.full_name} (${patient.phone_number})`;
+                    select.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                showMessage('Error loading patients: ' + error.message, 'danger');
+            }
+        }
+        
+        // Update message template
+        function updateMessageTemplate() {
+            const messageType = document.getElementById('messageType').value;
+            const messageBody = document.getElementById('messageBody');
+            messageBody.value = templates[messageType] || '';
+            updateCharCount();
+        }
+        
+        // Update character count
+        function updateCharCount() {
+            const messageBody = document.getElementById('messageBody').value;
+            document.getElementById('charCount').textContent = messageBody.length;
+        }
+        
+        // Send SMS
+        async function sendSMS() {
+            const patientId = document.getElementById('patientSelect').value;
+            const messageType = document.getElementById('messageType').value;
+            const messageBody = document.getElementById('messageBody').value;
+            const token = localStorage.getItem('access_token');
+            
+            if (!patientId) {
+                showMessage('Please select a patient', 'warning');
+                return;
+            }
+            
+            if (!messageBody.trim()) {
+                showMessage('Please enter a message', 'warning');
+                return;
+            }
+            
+            const button = document.getElementById('sendButton');
+            button.disabled = true;
+            button.textContent = '📱 Sending...';
+            
+            try {
+                const response = await authenticatedFetch('http://localhost:8000/api/v1/sms/send/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        patient_id: parseInt(patientId),
+                        message_type: messageType,
+                        message_body: messageBody
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'success') {
+                    showMessage(`✅ SMS sent successfully! SMS Log ID: ${data.sms_log_id}`, 'success');
+                    
+                    // Show result
+                    const resultBox = document.getElementById('resultBox');
+                    resultBox.className = 'result-box show alert alert-success';
+                    resultBox.innerHTML = `
+                        <div class="alert-title">SMS Sent!</div>
+                        <p class="alert-message">
+                            SMS Log ID: ${data.sms_log_id}<br>
+                            Twilio SID: ${data.twilio_sid}<br>
+                            Status: Sent
+                        </p>
+                    `;
+                    
+                    // Clear form
+                    document.getElementById('messageBody').value = '';
+                    updateCharCount();
+                    
+                    // Reload SMS logs
+                    setTimeout(loadSMSLogs, 2000);
+                } else {
+                    showMessage(`❌ Error: ${data.message || 'Failed to send SMS'}`, 'danger');
+                }
+                
+            } catch (error) {
+                console.error('Error sending SMS:', error);
+                showMessage('Error: ' + error.message, 'danger');
+            } finally {
+                button.disabled = false;
+                button.textContent = '📱 Send SMS';
+            }
+        }
+        
+        // Load SMS logs
+        async function loadSMSLogs() {
+            const token = localStorage.getItem('access_token');
+            
+            try {
+                const response = await authenticatedFetch('http://localhost:8000/api/v1/sms/?ordering=-sent_at');
+                
+                const data = await response.json();
+                const logs = (data.results || data).slice(0, 5);
+                
+                const container = document.getElementById('smsLogsList');
+                
+                if (logs.length === 0) {
+                    container.innerHTML = '<p style="color: var(--gray-600);">No SMS logs yet</p>';
+                    return;
+                }
+                
+                container.innerHTML = logs.map(log => `
+                    <div class="sms-log-item">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                            <strong>${log.patient_name}</strong>
+                            <span class="badge badge-${getStatusColor(log.status)}">${log.status}</span>
+                        </div>
+                        <div style="font-size: var(--text-sm); color: var(--gray-600);">
+                            Type: ${log.message_type}<br>
+                            To: ${log.patient_phone}<br>
+                            Message: ${log.message_body.substring(0, 100)}${log.message_body.length > 100 ? '...' : ''}<br>
+                            Sent: ${new Date(log.sent_at).toLocaleString()}
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading SMS logs:', error);
+            }
+        }
+        
+        function getStatusColor(status) {
+            const colors = {
+                'SENT': 'success',
+                'DELIVERED': 'success',
+                'QUEUED': 'warning',
+                'FAILED': 'danger'
+            };
+            return colors[status] || 'secondary';
+        }
+        
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = `
+                <div class="alert alert-${type}">
+                    <div class="alert-content">
+                        <p class="alert-message">${message}</p>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+        
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPatients();
+            loadSMSLogs();
+            updateMessageTemplate();
+            
+            // Refresh SMS logs every 10 seconds
+            setInterval(loadSMSLogs, 10000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <script src="/js/auth-utils.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏥</div>
+                <div>
+                    <h1 class="sidebar-title">MediSched</h1>
+                    <p class="sidebar-subtitle">AI-Powered Scheduling</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard-corporate.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/calendar-corporate.html" class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/appointments-corporate.html" class="nav-item active">
+                    <span class="nav-icon">📋</span>
+                    <span>Appointments</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="/patients-corporate.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span>Patients</span>
+                </a>
+                <a href="/doctors-corporate.html" class="nav-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Doctors</span>
+                </a>
+                <a href="/slots-corporate.html" class="nav-item">
+                    <span class="nav-icon">🕐</span>
+                    <span>Availability</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Communication</div>
+                <a href="/test-sms.html" class="nav-item">
+                    <span class="nav-icon">📱</span>
+                    <span>SMS Messages</span>
+                </a>
+                <a href="/call-logs-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Call Logs</span>
+                </a>
+                <a href="/reminders-corporate.html" class="nav-item">
+                    <span class="nav-icon">📧</span>
+                    <span>Reminders</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h2 class="top-bar-title">Appointments</h2>
+            <div class="top-bar-actions">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Header -->
+            <div class="card-header mb-6">
+                <div>
+                    <h3 class="card-title">All Appointments</h3>
+                    <p style="color: var(--gray-600); margin: var(--space-2) 0 0 0;">View and manage all booked appointments</p>
+                </div>
+                <div style="display: flex; gap: var(--space-3);">
+                    <select id="statusFilter" class="form-select" onchange="loadAppointments()" style="width: 200px;">
+                        <option value="">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="CONFIRMED">Confirmed</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                        <option value="NO_SHOW">No Show</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadAppointments()">
+                        <span>🔄</span>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid mb-6">
+                <div class="stat-card primary">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="statTotal">0</div>
+                            <div class="stat-label">Total Appointments</div>
+                        </div>
+                        <div class="stat-icon">📋</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card warning">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="statPending">0</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                        <div class="stat-icon">⏳</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="statConfirmed">0</div>
+                            <div class="stat-label">Confirmed</div>
+                        </div>
+                        <div class="stat-icon">✅</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card info">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="statCompleted">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-icon">✓</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Appointments Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div id="appointmentsContainer">
+                        <div class="loading">Loading appointments...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Update Status Modal -->
+    <div id="updateStatusModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Update Appointment Status</h3>
+                <button class="modal-close" onclick="closeStatusModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Appointment Details</label>
+                    <div id="appointmentDetails" style="background: var(--gray-50); padding: var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4);"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label form-label-required">New Status</label>
+                    <select id="newStatus" class="form-select">
+                        <option value="PENDING">Pending</option>
+                        <option value="CONFIRMED">Confirmed</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                        <option value="NO_SHOW">No Show</option>
+                    </select>
+                </div>
+                
+                <div id="statusMessage"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeStatusModal()">Cancel</button>
+                <button class="btn btn-primary" id="updateStatusBtn" onclick="updateStatus()">Update Status</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const token = localStorage.getItem('access_token');
+        const user = localStorage.getItem('user');
+        
+        if (!token) {
+            window.location.href = '/login-corporate.html';
+        } else {
+            if (user) {
+                const userData = JSON.parse(user);
+                const firstName = userData.email.split('@')[0].split('.')[0];
+                const initials = firstName.substring(0, 2).toUpperCase();
+                
+                document.getElementById('userName').textContent = userData.email;
+                document.getElementById('userRole').textContent = userData.role;
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+        
+        let selectedAppointment = null;
+        
+        async function loadAppointments() {
+            try {
+                const statusFilter = document.getElementById('statusFilter').value;
+                let url = 'http://localhost:8000/api/v1/appointments/';
+                if (statusFilter) {
+                    url += `?status=${statusFilter}`;
+                }
+                
+                const response = await authenticatedFetch(url);
+                
+                if (!response.ok) throw new Error('Failed to fetch appointments');
+                
+                const data = await response.json();
+                const appointments = data.results || data;
+                
+                // Update stats
+                document.getElementById('statTotal').textContent = appointments.length;
+                document.getElementById('statPending').textContent = appointments.filter(a => a.status === 'PENDING').length;
+                document.getElementById('statConfirmed').textContent = appointments.filter(a => a.status === 'CONFIRMED').length;
+                document.getElementById('statCompleted').textContent = appointments.filter(a => a.status === 'COMPLETED').length;
+                
+                if (appointments.length === 0) {
+                    document.getElementById('appointmentsContainer').innerHTML = `
+                        <div class="alert alert-info">
+                            <div class="alert-icon">ℹ️</div>
+                            <div class="alert-content">
+                                <div class="alert-title">No Appointments Found</div>
+                                <p class="alert-message">No appointments match your filter criteria.</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                displayAppointments(appointments);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('appointmentsContainer').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Error Loading Appointments</div>
+                            <p class="alert-message">${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayAppointments(appointments) {
+            const getStatusBadge = (status) => {
+                const badges = {
+                    'PENDING': 'warning',
+                    'CONFIRMED': 'success',
+                    'COMPLETED': 'info',
+                    'CANCELLED': 'danger',
+                    'NO_SHOW': 'danger'
+                };
+                return badges[status] || 'info';
+            };
+            
+            const getStatusLabel = (status) => {
+                const labels = {
+                    'PENDING': 'Pending',
+                    'CONFIRMED': 'Confirmed',
+                    'COMPLETED': 'Completed',
+                    'CANCELLED': 'Cancelled',
+                    'NO_SHOW': 'No Show'
+                };
+                return labels[status] || status;
+            };
+            
+            const html = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Booked By</th>
+                                <th>Booked At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${appointments.map(a => `
+                                <tr>
+                                    <td><span class="badge badge-gray">#${a.id}</span></td>
+                                    <td>
+                                        <strong>${a.patient_name || 'N/A'}</strong><br>
+                                        <small style="color: var(--gray-600);">${a.patient_phone || ''}</small>
+                                    </td>
+                                    <td>
+                                        <strong>${a.doctor_name || 'N/A'}</strong><br>
+                                        <small style="color: var(--gray-600);">${a.doctor_specialization || ''}</small>
+                                    </td>
+                                    <td>${a.appointment_date || 'N/A'}</td>
+                                    <td>${a.appointment_time ? a.appointment_time.substring(0,5) : 'N/A'}</td>
+                                    <td><span class="badge badge-${getStatusBadge(a.status)}">${getStatusLabel(a.status)}</span></td>
+                                    <td>${a.booked_by_name || 'N/A'}</td>
+                                    <td>${a.booked_at ? new Date(a.booked_at).toLocaleString() : 'N/A'}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick='openStatusModal(${JSON.stringify(a)})' title="Update Status">
+                                            📝 Update
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('appointmentsContainer').innerHTML = html;
+        }
+        
+        function openStatusModal(appointment) {
+            selectedAppointment = appointment;
+            
+            document.getElementById('appointmentDetails').innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                    <div><strong>Patient:</strong> ${appointment.patient_name}</div>
+                    <div><strong>Doctor:</strong> ${appointment.doctor_name}</div>
+                    <div><strong>Date:</strong> ${appointment.appointment_date}</div>
+                    <div><strong>Time:</strong> ${appointment.appointment_time ? appointment.appointment_time.substring(0,5) : 'N/A'}</div>
+                    <div><strong>Current Status:</strong> <span class="badge badge-${getStatusBadge(appointment.status)}">${appointment.status}</span></div>
+                </div>
+            `;
+            
+            document.getElementById('newStatus').value = appointment.status;
+            document.getElementById('updateStatusModal').style.display = 'flex';
+        }
+        
+        function closeStatusModal() {
+            document.getElementById('updateStatusModal').style.display = 'none';
+            document.getElementById('statusMessage').innerHTML = '';
+            selectedAppointment = null;
+        }
+        
+        async function updateStatus() {
+            const btn = document.getElementById('updateStatusBtn');
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+            
+            const newStatus = document.getElementById('newStatus').value;
+            
+            try {
+                const response = await authenticatedFetch(`http://localhost:8000/api/v1/appointments/${selectedAppointment.id}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('statusMessage').innerHTML = `
+                        <div class="alert alert-success">
+                            <div class="alert-icon">✅</div>
+                            <div class="alert-content">
+                                <p class="alert-message">Status updated successfully!</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        closeStatusModal();
+                        loadAppointments();
+                    }, 1500);
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Failed to update status');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('statusMessage').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <p class="alert-message">${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Update Status';
+            }
+        }
+        
+        function getStatusBadge(status) {
+            const badges = {
+                'PENDING': 'warning',
+                'CONFIRMED': 'success',
+                'COMPLETED': 'info',
+                'CANCELLED': 'danger',
+                'NO_SHOW': 'danger'
+            };
+            return badges[status] || 'info';
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login-corporate.html';
+            }
+        }
+        
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('updateStatusModal');
+            if (event.target === modal) {
+                closeStatusModal();
+            }
+        }
+        
+        loadAppointments();
+        console.log('✅ Appointments page loaded');
+    </script>
+</body>
+</html>

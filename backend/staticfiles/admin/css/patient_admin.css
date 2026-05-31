@@ -1,0 +1,65 @@
+/* Custom CSS for Patient Admin - AGGRESSIVE STAR MARK DISPLAY */
+
+/* HIGHEST PRIORITY - Force asterisk on assigned_doctor field */
+body.change-form .form-row.field-assigned_doctor label::after,
+body.add-form .form-row.field-assigned_doctor label::after,
+div.form-row.field-assigned_doctor label::after,
+.form-row.field-assigned_doctor > div > label::after,
+.form-row.field-assigned_doctor label[for="id_assigned_doctor"]::after,
+label[for="id_assigned_doctor"]::after {
+    content: " *" !important;
+    color: #ff0000 !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    margin-left: 5px !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Ensure the label itself is visible */
+.form-row.field-assigned_doctor label,
+label[for="id_assigned_doctor"] {
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+/* Make the form row required */
+.form-row.field-assigned_doctor {
+    position: relative;
+}
+
+.form-row.field-assigned_doctor::before {
+    content: "" !important;
+    position: absolute;
+    left: -10px;
+    top: 0;
+    width: 5px;
+    height: 100%;
+    background-color: #ff0000;
+    opacity: 0.3;
+}
+
+/* Alternative: Add asterisk as background */
+.form-row.field-assigned_doctor label {
+    background-image: none !important;
+}
+
+/* Ensure Django's default styles don't override */
+.form-row.field-assigned_doctor.required label::after,
+.form-row.required.field-assigned_doctor label::after {
+    content: " *" !important;
+    color: #ff0000 !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    margin-left: 5px !important;
+}
+
+/* Nuclear option - add to all labels in the required section */
+fieldset.module:first-of-type .form-row label::after {
+    content: " *" !important;
+    color: #ff0000 !important;
+    font-weight: bold !important;
+    font-size: 14px !important;
+    margin-left: 3px !important;
+}

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Operations - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        .ai-operations-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-6);
+        }
+
+        .operations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--space-6);
+            margin-top: var(--space-6);
+        }
+
+        .operation-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-md);
+            border: 2px solid var(--color-border);
+        }
+
+        .operation-card h3 {
+            color: var(--color-primary);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .operation-icon {
+            font-size: var(--text-2xl);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-2);
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--space-3);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: var(--text-base);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, #7B1FA2 0%, #4A148C 100%);
+            color: white;
+            padding: var(--space-3) var(--space-6);
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: var(--space-2);
+        }
+
+        .btn-ai:hover {
+            opacity: 0.9;
+        }
+
+        .btn-ai:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-box {
+            margin-top: var(--space-4);
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-secondary);
+            display: none;
+        }
+
+        .result-box.success {
+            background: #E8F5E9;
+            border: 1px solid #4CAF50;
+            color: #2E7D32;
+        }
+
+        .result-box.error {
+            background: #FFEBEE;
+            border: 1px solid #F44336;
+            color: #C62828;
+        }
+
+        .result-box.info {
+            background: #E3F2FD;
+            border: 1px solid #2196F3;
+            color: #1565C0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            margin-top: var(--space-2);
+        }
+
+        .status-configured {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-not-configured {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        .config-status {
+            background: var(--color-bg-secondary);
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-6);
+        }
+
+        .config-status h3 {
+            margin-bottom: var(--space-3);
+            color: var(--color-primary);
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .config-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">🏥</div>
+            <h2>MediSched AI</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard-corporate.html">📊 Dashboard</a>
+            <a href="/patients-corporate.html">👥 Patients</a>
+            <a href="/doctors-corporate.html">👨‍⚕️ Doctors</a>
+            <a href="/appointments-corporate.html">📅 Appointments</a>
+            <a href="/slots-corporate.html">🕐 Slots</a>
+            <a href="/calendar-corporate.html">📆 Calendar</a>
+            <a href="/call-logs-corporate.html">📞 Call Logs</a>
+            <a href="/test-sms.html">💬 SMS</a>
+            <a href="/reminders-corporate.html">⏰ Reminders</a>
+            <a href="/analytics-corporate.html">📈 Analytics</a>
+            <a href="/ai-operations-corporate.html" class="active">🤖 AI Operations</a>
+        </nav>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="main-content">
+        <div class="ai-operations-container">
+            <h1>🤖 AI Operations Center</h1>
+            <p>Test and manage AI-powered features</p>
+
+            <!-- Configuration Status -->
+            <div class="config-status">
+                <h3>🔧 AI Services Configuration Status</h3>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <span>📞 Twilio (Calling):</span>
+                        <span class="status-badge status-configured">✓ Configured</span>
+                    </div>
+                    <div class="config-item">
+                        <span>🎤 OpenAI Whisper:</span>
+                        <span class="status-badge status-configured">✓ Configured</span>
+                    </div>
+                    <div class="config-item">
+                        <span>📧 Email Service:</span>
+                        <span class="status-badge status-configured">✓ Configured</span>
+                    </div>
+                    <div class="config-item">
+                        <span>⚙️ Celery Worker:</span>
+                        <span class="status-badge status-configured">✓ Running</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operations Grid -->
+            <div class="operations-grid">
+                <!-- AI Calling -->
+                <div class="operation-card">
+                    <h3><span class="operation-icon">📞</span> AI Calling System</h3>
+                    <p>Initiate AI-powered calls to patients with 3-attempt escalation</p>
+                    
+                    <div class="form-group">
+                        <label for="call-patient">Select Patient:</label>
+                        <select id="call-patient">
+                            <option value="">Loading patients...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="call-type">Call Type:</label>
+                        <select id="call-type">
+                            <option value="APPOINTMENT_REMINDER">Appointment Reminder</option>
+                            <option value="SLOT_OFFER">Slot Offer</option>
+                            <option value="FOLLOW_UP">Follow Up</option>
+                            <option value="GENERAL">General</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-ai" onclick="initiateAICall()">
+                        📞 Initiate AI Call
+                    </button>
+
+                    <div id="call-result" class="result-box"></div>
+                </div>
+
+                <!-- Call Transcription -->
+                <div class="operation-card">
+                    <h3><span class="operation-icon">🎤</span> Call Transcription</h3>
+                    <p>Transcribe call recordings using OpenAI Whisper API</p>
+                    
+                    <div class="form-group">
+                        <label for="transcribe-call">Select Call Log:</label>
+                        <select id="transcribe-call">
+                            <option value="">Loading call logs...</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-ai" onclick="transcribeCall()">
+                        🎤 Transcribe Call
+                    </button>
+
+                    <div id="transcribe-result" class="result-box"></div>
+                </div>
+
+                <!-- SMS Messaging -->
+                <div class="operation-card">
+                    <h3><span class="operation-icon">💬</span> SMS Messaging</h3>
+                    <p>Send SMS messages to patients via Twilio</p>
+                    
+                    <div class="form-group">
+                        <label for="sms-patient">Select Patient:</label>
+                        <select id="sms-patient">
+                            <option value="">Loading patients...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sms-message">Message:</label>
+                        <textarea id="sms-message" placeholder="Enter your message..."></textarea>
+                    </div>
+
+                    <button class="btn-ai" onclick="sendSMS()">
+                        💬 Send SMS
+                    </button>
+
+                    <div id="sms-result" class="result-box"></div>
+                </div>
+
+                <!-- Email Reminders -->
+                <div class="operation-card">
+                    <h3><span class="operation-icon">📧</span> Email Reminders</h3>
+                    <p>Send appointment reminders via email</p>
+                    
+                    <div class="form-group">
+                        <label for="email-appointment">Select Appointment:</label>
+                        <select id="email-appointment">
+                            <option value="">Loading appointments...</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-ai" onclick="sendEmailReminder()">
+                        📧 Send Email Reminder
+                    </button>
+
+                    <div id="email-result" class="result-box"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPatients();
+            loadCallLogs();
+            loadAppointments();
+        });
+
+        // Load patients
+        async function loadPatients() {
+            try {
+                const response = await authenticatedFetch('/api/v1/patients/');
+                const patients = await response.json();
+                
+                const callPatientSelect = document.getElementById('call-patient');
+                const smsPatientSelect = document.getElementById('sms-patient');
+                
+                const options = patients.map(p => 
+                    `<option value="${p.id}">${p.full_name} - ${p.phone_number}</option>`
+                ).join('');
+                
+                callPatientSelect.innerHTML = '<option value="">Select a patient...</option>' + options;
+                smsPatientSelect.innerHTML = '<option value="">Select a patient...</option>' + options;
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+
+        // Load call logs
+        async function loadCallLogs() {
+            try {
+                const response = await authenticatedFetch('/api/v1/calling/call-logs/');
+                const callLogs = await response.json();
+                
+                const select = document.getElementById('transcribe-call');
+                const options = callLogs.map(c => 
+                    `<option value="${c.id}">Call #${c.id} - ${c.patient_name} (${c.created_at})</option>`
+                ).join('');
+                
+                select.innerHTML = '<option value="">Select a call log...</option>' + options;
+            } catch (error) {
+                console.error('Error loading call logs:', error);
+            }
+        }
+
+        // Load appointments
+        async function loadAppointments() {
+            try {
+                const response = await authenticatedFetch('/api/v1/appointments/');
+                const appointments = await response.json();
+                
+                const select = document.getElementById('email-appointment');
+                const options = appointments.map(a => 
+                    `<option value="${a.id}">${a.patient_name} - ${a.appointment_date} ${a.appointment_time}</option>`
+                ).join('');
+                
+                select.innerHTML = '<option value="">Select an appointment...</option>' + options;
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+            }
+        }
+
+        // Initiate AI Call
+        async function initiateAICall() {
+            const patientId = document.getElementById('call-patient').value;
+            const callType = document.getElementById('call-type').value;
+            const resultBox = document.getElementById('call-result');
+
+            if (!patientId) {
+                showResult(resultBox, 'Please select a patient', 'error');
+                return;
+            }
+
+            try {
+                const response = await authenticatedFetch('/api/v1/calling/logs/initiate/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        patient_id: parseInt(patientId),
+                        call_type: callType
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(resultBox, 
+                        `✓ AI Call initiated successfully!<br>
+                        Call Log ID: ${data.call_log_id}<br>
+                        Status: ${data.status}<br>
+                        Message: ${data.message || 'Call queued for processing'}`, 
+                        'success'
+                    );
+                    // Reload call logs after 2 seconds
+                    setTimeout(() => loadCallLogs(), 2000);
+                } else {
+                    showResult(resultBox, `Error: ${data.message || data.error || 'Failed to initiate call'}`, 'error');
+                }
+            } catch (error) {
+                showResult(resultBox, `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Transcribe Call
+        async function transcribeCall() {
+            const callLogId = document.getElementById('transcribe-call').value;
+            const resultBox = document.getElementById('transcribe-result');
+
+            if (!callLogId) {
+                showResult(resultBox, 'Please select a call log', 'error');
+                return;
+            }
+
+            try {
+                const response = await authenticatedFetch(`/api/v1/calling/logs/${callLogId}/transcribe/`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(resultBox, 
+                        `✓ Transcription started!<br>
+                        Status: ${data.status}<br>
+                        Message: ${data.message || 'Transcription queued for processing'}`, 
+                        'success'
+                    );
+                } else {
+                    showResult(resultBox, `Error: ${data.message || data.error || 'Failed to start transcription'}`, 'error');
+                }
+            } catch (error) {
+                showResult(resultBox, `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Send SMS
+        async function sendSMS() {
+            const patientId = document.getElementById('sms-patient').value;
+            const message = document.getElementById('sms-message').value;
+            const resultBox = document.getElementById('sms-result');
+
+            if (!patientId || !message) {
+                showResult(resultBox, 'Please select a patient and enter a message', 'error');
+                return;
+            }
+
+            try {
+                const response = await authenticatedFetch('/api/v1/sms/send/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        patient_id: patientId,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(resultBox, 
+                        `✓ SMS sent successfully!<br>
+                        Message ID: ${data.id}<br>
+                        Status: ${data.status}`, 
+                        'success'
+                    );
+                    document.getElementById('sms-message').value = '';
+                } else {
+                    showResult(resultBox, `Error: ${data.error || 'Failed to send SMS'}`, 'error');
+                }
+            } catch (error) {
+                showResult(resultBox, `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Send Email Reminder
+        async function sendEmailReminder() {
+            const appointmentId = document.getElementById('email-appointment').value;
+            const resultBox = document.getElementById('email-result');
+
+            if (!appointmentId) {
+                showResult(resultBox, 'Please select an appointment', 'error');
+                return;
+            }
+
+            try {
+                const response = await authenticatedFetch(`/api/v1/reminders/send-reminder/${appointmentId}/`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(resultBox, 
+                        `✓ Email reminder sent successfully!<br>
+                        ${data.message || ''}`, 
+                        'success'
+                    );
+                } else {
+                    showResult(resultBox, `Error: ${data.error || 'Failed to send email'}`, 'error');
+                }
+            } catch (error) {
+                showResult(resultBox, `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Show result
+        function showResult(element, message, type) {
+            element.innerHTML = message;
+            element.className = `result-box ${type}`;
+            element.style.display = 'block';
+            
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 10000);
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/login-corporate.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Test</title>
+</head>
+<body>
+    <h1>Recording Test</h1>
+    <audio controls id="player">
+        <source src="/api/v1/calling/logs/193/recording/" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        const player = document.getElementById('player');
+        
+        player.addEventListener('loadedmetadata', () => {
+            console.log('Duration:', player.duration);
+            document.body.innerHTML += '<p>Duration: ' + player.duration + ' seconds</p>';
+        });
+        
+        player.addEventListener('error', (e) => {
+            console.error('Error:', player.error);
+            document.body.innerHTML += '<p style="color:red">Error: ' + (player.error ? player.error.message : 'Unknown') + '</p>';
+        });
+    </script>
+</body>
+</html>

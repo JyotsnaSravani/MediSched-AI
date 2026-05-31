@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patients - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+        }
+        
+        .search-bar {
+            margin-bottom: var(--space-6);
+        }
+        
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--space-12);
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: var(--space-4);
+        }
+        
+        .empty-state-title {
+            font-size: var(--text-2xl);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+        
+        .empty-state-text {
+            color: var(--gray-600);
+            margin-bottom: var(--space-6);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: var(--z-modal);
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: var(--text-2xl);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: var(--text-2xl);
+            color: var(--gray-600);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        
+        .modal-close:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+        
+        .modal-body {
+            padding: var(--space-6);
+        }
+        
+        .modal-footer {
+            padding: var(--space-6);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: var(--space-3);
+            justify-content: flex-end;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏥</div>
+                <div>
+                    <h1 class="sidebar-title">MediSched</h1>
+                    <p class="sidebar-subtitle">AI-Powered Scheduling</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard-corporate.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/calendar-corporate.html" class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/appointments-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Appointments</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="/patients-corporate.html" class="nav-item active">
+                    <span class="nav-icon">👥</span>
+                    <span>Patients</span>
+                </a>
+                <a href="/doctors-corporate.html" class="nav-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Doctors</span>
+                </a>
+                <a href="/slots-corporate.html" class="nav-item">
+                    <span class="nav-icon">🕐</span>
+                    <span>Availability</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Communication</div>
+                <a href="/test-sms.html" class="nav-item">
+                    <span class="nav-icon">📱</span>
+                    <span>SMS Messages</span>
+                </a>
+                <a href="/call-logs-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Call Logs</span>
+                </a>
+                <a href="/reminders-corporate.html" class="nav-item">
+                    <span class="nav-icon">📧</span>
+                    <span>Reminders</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/analytics-corporate.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h2 class="top-bar-title">Patients</h2>
+            <div class="top-bar-actions">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="page-header">
+                <div>
+                    <h3 style="margin-bottom: var(--space-2);">Patient Management</h3>
+                    <p style="color: var(--gray-600); margin: 0;">View and manage all registered patients</p>
+                </div>
+                <button class="btn btn-primary" onclick="openAddPatientModal()">
+                    <span>➕</span>
+                    <span>Add Patient</span>
+                </button>
+            </div>
+            
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="form-input search-input" 
+                    placeholder="🔍 Search patients by name, email, or phone..."
+                    onkeyup="filterPatients()"
+                >
+            </div>
+            
+            <div id="patientsContainer">
+                <div class="loading" style="text-align: center; padding: var(--space-12); color: var(--gray-600);">
+                    Loading patients...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Patient Modal -->
+    <div id="addPatientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Patient</h3>
+                <button class="modal-close" onclick="closeAddPatientModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="addPatientForm">
+                    <div class="form-group">
+                        <label class="form-label form-label-required">Full Name</label>
+                        <input type="text" id="patientFullName" class="form-input" placeholder="Enter patient's full name" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label form-label-required">Phone Number</label>
+                            <input type="tel" id="patientPhone" class="form-input" placeholder="+1234567890" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="patientEmail" class="form-input" placeholder="patient@example.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label form-label-required">Date of Birth</label>
+                            <input type="date" id="patientDOB" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label form-label-required">Gender</label>
+                            <select id="patientGender" class="form-select" required>
+                                <option value="">Select gender...</option>
+                                <option value="MALE">Male</option>
+                                <option value="FEMALE">Female</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <textarea id="patientAddress" class="form-input" rows="2" placeholder="Enter patient's address (optional)"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Assign Doctor</label>
+                        <select id="patientDoctor" class="form-select">
+                            <option value="">No doctor assigned</option>
+                        </select>
+                    </div>
+                    
+                    <input type="hidden" id="patientId" value="">
+                    
+                    <div id="patientMessage"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAddPatientModal()">Cancel</button>
+                <button class="btn btn-primary" id="submitPatientBtn" onclick="submitPatient()">
+                    <span id="submitPatientIcon">➕</span>
+                    <span id="submitPatientText">Add Patient</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const token = localStorage.getItem('access_token');
+        const user = localStorage.getItem('user');
+        
+        if (!token) {
+            window.location.href = '/login-corporate.html';
+        } else {
+            if (user) {
+                const userData = JSON.parse(user);
+                const firstName = userData.email.split('@')[0].split('.')[0];
+                const initials = firstName.substring(0, 2).toUpperCase();
+                
+                document.getElementById('userName').textContent = userData.email;
+                document.getElementById('userRole').textContent = userData.role;
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+        
+        async function loadPatients() {
+            try {
+                const response = await authenticatedFetch('http://127.0.0.1:8000/api/v1/patients/');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const patients = data.results || data;
+                
+                if (!patients || patients.length === 0) {
+                    document.getElementById('patientsContainer').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👥</div>
+                            <h3 class="empty-state-title">No Patients Found</h3>
+                            <p class="empty-state-text">Get started by adding your first patient or run the demo seed command.</p>
+                            <button class="btn btn-primary" onclick="openAddPatientModal()">Add First Patient</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                displayPatients(patients);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('patientsContainer').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Error Loading Patients</div>
+                            <p class="alert-message">${error.message}. Please check if the backend is running and you are logged in.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayPatients(patients) {
+            const html = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Email</th>
+                                <th>Phone Number</th>
+                                <th>Date of Birth</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Assigned Doctor</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${patients.map((p, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td><span class="badge badge-gray">#${p.id}</span></td>
+                                    <td><strong>${p.full_name}</strong></td>
+                                    <td>${p.email || '<span style="color: var(--gray-500);">N/A</span>'}</td>
+                                    <td>${p.phone_number}</td>
+                                    <td>${p.date_of_birth}</td>
+                                    <td>${p.age || '<span style="color: var(--gray-500);">N/A</span>'}</td>
+                                    <td>${p.gender_display || p.gender}</td>
+                                    <td>${p.assigned_doctor_name ? '<span class="badge badge-primary">Dr. ' + p.assigned_doctor_name + '</span>' : '<span style="color: var(--gray-500);">Not Assigned</span>'}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline" onclick='editPatient(${JSON.stringify(p)})' title="Edit Patient">✏️</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deletePatient(${p.id}, '${p.full_name}')" title="Delete Patient">🗑️</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('patientsContainer').innerHTML = html;
+        }
+        
+        function filterPatients() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login-corporate.html';
+            }
+        }
+        
+        loadPatients();
+        loadDoctorsForAssignment();
+        console.log('✅ Corporate patients page loaded');
+        
+        // Modal Functions
+        function openAddPatientModal() {
+            document.getElementById('patientId').value = '';
+            document.getElementById('addPatientModal').classList.add('active');
+            document.querySelector('.modal-title').textContent = 'Add New Patient';
+            document.getElementById('submitPatientIcon').textContent = '➕';
+            document.getElementById('submitPatientText').textContent = 'Add Patient';
+        }
+        
+        function closeAddPatientModal() {
+            document.getElementById('addPatientModal').classList.remove('active');
+            document.getElementById('addPatientForm').reset();
+            document.getElementById('patientMessage').innerHTML = '';
+            document.getElementById('patientId').value = '';
+        }
+        
+        async function loadDoctorsForAssignment() {
+            try {
+                const response = await authenticatedFetch('http://127.0.0.1:8000/api/v1/doctors/');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const doctors = data.results || data;
+                    
+                    const options = doctors.filter(d => d.status === 'ACTIVE').map(d => 
+                        `<option value="${d.id}">Dr. ${d.full_name} - ${d.specialization}</option>`
+                    ).join('');
+                    
+                    document.getElementById('patientDoctor').innerHTML = '<option value="">No doctor assigned</option>' + options;
+                }
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+            }
+        }
+        
+        function editPatient(patient) {
+            document.getElementById('patientId').value = patient.id;
+            document.getElementById('patientFullName').value = patient.full_name;
+            document.getElementById('patientPhone').value = patient.phone_number;
+            document.getElementById('patientEmail').value = patient.email || '';
+            document.getElementById('patientDOB').value = patient.date_of_birth;
+            document.getElementById('patientGender').value = patient.gender;
+            document.getElementById('patientAddress').value = patient.address || '';
+            document.getElementById('patientDoctor').value = patient.assigned_doctor || '';
+            
+            document.querySelector('.modal-title').textContent = 'Edit Patient';
+            document.getElementById('submitPatientIcon').textContent = '💾';
+            document.getElementById('submitPatientText').textContent = 'Update Patient';
+            document.getElementById('addPatientModal').classList.add('active');
+        }
+        
+        async function deletePatient(patientId, patientName) {
+            if (!confirm(`Are you sure you want to delete patient "${patientName}"? This action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const response = await authenticatedFetch(`http://127.0.0.1:8000/api/v1/patients/${patientId}/`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok || response.status === 204) {
+                    alert('Patient deleted successfully!');
+                    loadPatients();
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.detail || data.message || 'Failed to delete patient');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        async function submitPatient() {
+            const submitBtn = document.getElementById('submitPatientBtn');
+            const patientId = document.getElementById('patientId').value;
+            const isEdit = !!patientId;
+            
+            submitBtn.disabled = true;
+            document.getElementById('submitPatientIcon').textContent = '⏳';
+            document.getElementById('submitPatientText').textContent = isEdit ? 'Updating...' : 'Adding...';
+            
+            const fullName = document.getElementById('patientFullName').value.trim();
+            const phoneNumber = document.getElementById('patientPhone').value.trim();
+            const email = document.getElementById('patientEmail').value.trim();
+            const dateOfBirth = document.getElementById('patientDOB').value;
+            const gender = document.getElementById('patientGender').value;
+            const address = document.getElementById('patientAddress').value.trim();
+            const doctorId = document.getElementById('patientDoctor').value;
+            
+            if (!fullName || !phoneNumber || !dateOfBirth || !gender) {
+                document.getElementById('patientMessage').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <p class="alert-message">Please fill in all required fields</p>
+                        </div>
+                    </div>
+                `;
+                submitBtn.disabled = false;
+                document.getElementById('submitPatientIcon').textContent = isEdit ? '💾' : '➕';
+                document.getElementById('submitPatientText').textContent = isEdit ? 'Update Patient' : 'Add Patient';
+                return;
+            }
+            
+            try {
+                const payload = {
+                    full_name: fullName,
+                    phone_number: phoneNumber,
+                    date_of_birth: dateOfBirth,
+                    gender: gender
+                };
+                
+                // Add optional fields if provided
+                if (email) payload.email = email;
+                if (address) payload.address = address;
+                if (doctorId) payload.assigned_doctor = parseInt(doctorId);
+                
+                const url = isEdit 
+                    ? `http://127.0.0.1:8000/api/v1/patients/${patientId}/`
+                    : 'http://127.0.0.1:8000/api/v1/patients/';
+                
+                const response = await authenticatedFetch(url, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('patientMessage').innerHTML = `
+                        <div class="alert alert-success">
+                            <div class="alert-icon">✅</div>
+                            <div class="alert-content">
+                                <p class="alert-message">Patient ${isEdit ? 'updated' : 'added'} successfully!</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        closeAddPatientModal();
+                        loadPatients();
+                    }, 1500);
+                } else {
+                    const errorMsg = data.detail || data.message || JSON.stringify(data);
+                    throw new Error(errorMsg);
+                }
+            } catch (error) {
+                document.getElementById('patientMessage').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <p class="alert-message">${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                document.getElementById('submitPatientIcon').textContent = isEdit ? '💾' : '➕';
+                document.getElementById('submitPatientText').textContent = isEdit ? 'Update Patient' : 'Add Patient';
+            }
+        }
+        
+        // Set maximum date to today for DOB
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('patientDOB').max = today;
+    </script>
+</body>
+</html>

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--space-12);
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: var(--space-4);
+        }
+        
+        .empty-state-title {
+            font-size: var(--text-2xl);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+        
+        .empty-state-text {
+            color: var(--gray-600);
+            margin-bottom: var(--space-6);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: var(--z-modal);
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: var(--text-2xl);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: var(--text-2xl);
+            color: var(--gray-600);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        
+        .modal-close:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+        
+        .modal-body {
+            padding: var(--space-6);
+        }
+        
+        .modal-footer {
+            padding: var(--space-6);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: var(--space-3);
+            justify-content: flex-end;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--space-2);
+            justify-content: center;
+        }
+        
+        .btn-icon {
+            padding: var(--space-2);
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: var(--text-sm);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+        }
+        
+        .btn-toggle {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+        
+        .btn-toggle:hover {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-delete {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+        
+        .btn-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏥</div>
+                <div>
+                    <h1 class="sidebar-title">MediSched</h1>
+                    <p class="sidebar-subtitle">AI-Powered Scheduling</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard-corporate.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/calendar-corporate.html" class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/appointments-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Appointments</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="/patients-corporate.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span>Patients</span>
+                </a>
+                <a href="/doctors-corporate.html" class="nav-item active">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Doctors</span>
+                </a>
+                <a href="/slots-corporate.html" class="nav-item">
+                    <span class="nav-icon">🕐</span>
+                    <span>Availability</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Communication</div>
+                <a href="/test-sms.html" class="nav-item">
+                    <span class="nav-icon">📱</span>
+                    <span>SMS Messages</span>
+                </a>
+                <a href="/call-logs-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Call Logs</span>
+                </a>
+                <a href="/reminders-corporate.html" class="nav-item">
+                    <span class="nav-icon">📧</span>
+                    <span>Reminders</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/analytics-corporate.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h2 class="top-bar-title">Doctors</h2>
+            <div class="top-bar-actions">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="page-header">
+                <div>
+                    <h3 style="margin-bottom: var(--space-2);">Doctor Management</h3>
+                    <p style="color: var(--gray-600); margin: 0;">View and manage all registered doctors</p>
+                </div>
+                <button class="btn btn-primary" onclick="openAddDoctorModal()">
+                    <span>➕</span>
+                    <span>Add Doctor</span>
+                </button>
+            </div>
+            
+            <div id="doctorsContainer">
+                <div class="loading" style="text-align: center; padding: var(--space-12); color: var(--gray-600);">
+                    Loading doctors...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Doctor Modal -->
+    <div id="addDoctorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Doctor</h3>
+                <button class="modal-close" onclick="closeAddDoctorModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="addDoctorForm">
+                    <div class="form-group">
+                        <label class="form-label form-label-required">Full Name</label>
+                        <input type="text" id="doctorFullName" class="form-input" placeholder="Enter doctor's full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label form-label-required">Specialization</label>
+                        <input type="text" id="doctorSpecialization" class="form-input" placeholder="e.g., Cardiologist, Pediatrician" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label form-label-required">Phone Number</label>
+                            <input type="tel" id="doctorPhone" class="form-input" placeholder="+1234567890" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label form-label-required">Email</label>
+                            <input type="email" id="doctorEmail" class="form-input" placeholder="doctor@example.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="doctorStatus" class="form-select">
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                        </select>
+                    </div>
+                    
+                    <div id="doctorMessage"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAddDoctorModal()">Cancel</button>
+                <button class="btn btn-primary" id="submitDoctorBtn" onclick="submitDoctor()">Add Doctor</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const token = localStorage.getItem('access_token');
+        const user = localStorage.getItem('user');
+        
+        if (!token) {
+            window.location.href = '/login-corporate.html';
+        } else {
+            if (user) {
+                const userData = JSON.parse(user);
+                const firstName = userData.email.split('@')[0].split('.')[0];
+                const initials = firstName.substring(0, 2).toUpperCase();
+                
+                document.getElementById('userName').textContent = userData.email;
+                document.getElementById('userRole').textContent = userData.role;
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+        
+        async function loadDoctors() {
+            try {
+                const response = await authenticatedFetch('http://127.0.0.1:8000/api/v1/doctors/');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const doctors = data.results || data;
+                
+                if (!doctors || doctors.length === 0) {
+                    document.getElementById('doctorsContainer').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👨‍⚕️</div>
+                            <h3 class="empty-state-title">No Doctors Found</h3>
+                            <p class="empty-state-text">Get started by adding your first doctor or run the demo seed command.</p>
+                            <button class="btn btn-primary" onclick="openAddDoctorModal()">Add First Doctor</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                displayDoctors(doctors);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('doctorsContainer').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Error Loading Doctors</div>
+                            <p class="alert-message">${error.message}. Please check if the backend is running and you are logged in.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayDoctors(doctors) {
+            const html = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>ID</th>
+                                <th>Doctor Name</th>
+                                <th>Specialization</th>
+                                <th>Email</th>
+                                <th>Phone Number</th>
+                                <th>Status</th>
+                                <th style="text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${doctors.map((d, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td><span class="badge badge-gray">#${d.id}</span></td>
+                                    <td><strong>Dr. ${d.full_name}</strong></td>
+                                    <td>${d.specialization}</td>
+                                    <td>${d.email}</td>
+                                    <td>${d.phone_number}</td>
+                                    <td><span class="badge badge-${d.status === 'ACTIVE' ? 'success' : 'danger'}">${d.status_display || d.status}</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button 
+                                                class="btn-icon btn-toggle" 
+                                                onclick="toggleDoctorStatus(${d.id}, '${d.status}')"
+                                                title="Toggle Status">
+                                                ${d.status === 'ACTIVE' ? '⏸️' : '▶️'}
+                                            </button>
+                                            <button 
+                                                class="btn-icon btn-delete" 
+                                                onclick="deleteDoctor(${d.id}, '${d.full_name}')"
+                                                title="Delete Doctor">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('doctorsContainer').innerHTML = html;
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login-corporate.html';
+            }
+        }
+        
+        loadDoctors();
+        console.log('✅ Corporate doctors page loaded');
+        
+        // Modal Functions
+        function openAddDoctorModal() {
+            document.getElementById('addDoctorModal').classList.add('active');
+        }
+        
+        function closeAddDoctorModal() {
+            document.getElementById('addDoctorModal').classList.remove('active');
+            document.getElementById('addDoctorForm').reset();
+            document.getElementById('doctorMessage').innerHTML = '';
+        }
+        
+        async function submitDoctor() {
+            const submitBtn = document.getElementById('submitDoctorBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding...';
+            
+            const fullName = document.getElementById('doctorFullName').value.trim();
+            const specialization = document.getElementById('doctorSpecialization').value.trim();
+            const phoneNumber = document.getElementById('doctorPhone').value.trim();
+            const email = document.getElementById('doctorEmail').value.trim();
+            const status = document.getElementById('doctorStatus').value;
+            
+            if (!fullName || !specialization || !phoneNumber || !email) {
+                document.getElementById('doctorMessage').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <p class="alert-message">Please fill in all required fields</p>
+                        </div>
+                    </div>
+                `;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Doctor';
+                return;
+            }
+            
+            try {
+                const response = await authenticatedFetch('http://127.0.0.1:8000/api/v1/doctors/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        specialization: specialization,
+                        phone_number: phoneNumber,
+                        email: email,
+                        status: status
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('doctorMessage').innerHTML = `
+                        <div class="alert alert-success">
+                            <div class="alert-icon">✅</div>
+                            <div class="alert-content">
+                                <p class="alert-message">Doctor added successfully!</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        closeAddDoctorModal();
+                        loadDoctors();
+                    }, 1500);
+                } else {
+                    const errorMsg = data.detail || data.message || JSON.stringify(data);
+                    throw new Error(errorMsg);
+                }
+            } catch (error) {
+                document.getElementById('doctorMessage').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <p class="alert-message">${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Doctor';
+            }
+        }
+        
+        // Toggle Doctor Status
+        async function toggleDoctorStatus(doctorId, currentStatus) {
+            const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            const statusText = newStatus === 'ACTIVE' ? 'activate' : 'deactivate';
+            
+            if (!confirm(`Are you sure you want to ${statusText} this doctor?`)) {
+                return;
+            }
+            
+            try {
+                const response = await authenticatedFetch(`http://127.0.0.1:8000/api/v1/doctors/${doctorId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
+                });
+                
+                if (response.ok) {
+                    loadDoctors();
+                } else {
+                    const data = await response.json();
+                    const errorMsg = data.detail || data.message || 'Failed to update status';
+                    alert(`Error: ${errorMsg}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        // Delete Doctor
+        async function deleteDoctor(doctorId, doctorName) {
+            if (!confirm(`Are you sure you want to delete Dr. ${doctorName}?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const response = await authenticatedFetch(`http://127.0.0.1:8000/api/v1/doctors/${doctorId}/`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok || response.status === 204) {
+                    alert(`Dr. ${doctorName} has been deleted successfully.`);
+                    loadDoctors();
+                } else {
+                    const data = await response.json();
+                    const errorMsg = data.detail || data.message || 'Failed to delete doctor';
+                    alert(`Error: ${errorMsg}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

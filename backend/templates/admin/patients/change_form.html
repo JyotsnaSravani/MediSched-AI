@@ -1,0 +1,67 @@
+{% extends "admin/change_form.html" %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+/* AGGRESSIVE INLINE STYLES - Highest Priority */
+body .form-row.field-assigned_doctor label::after,
+body label[for="id_assigned_doctor"]::after {
+    content: " *" !important;
+    color: #ff0000 !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    margin-left: 5px !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Force all labels in Required Information to show asterisk */
+fieldset.module:first-of-type .form-row label::after {
+    content: " *" !important;
+    color: #ff0000 !important;
+    font-weight: bold !important;
+    font-size: 14px !important;
+    margin-left: 3px !important;
+    display: inline-block !important;
+}
+
+/* Ensure visibility */
+.form-row.field-assigned_doctor label,
+label[for="id_assigned_doctor"] {
+    display: inline-block !important;
+    visibility: visible !important;
+}
+</style>
+
+<script>
+// Inline JavaScript - Runs immediately
+(function() {
+    console.log('Inline script: Adding asterisks...');
+    
+    function addAsteriskNow() {
+        var label = document.querySelector('label[for="id_assigned_doctor"]');
+        if (label && !label.querySelector('.inline-asterisk')) {
+            var span = document.createElement('span');
+            span.className = 'inline-asterisk';
+            span.innerHTML = ' <span style="color:#ff0000;font-weight:bold;font-size:16px;">*</span>';
+            label.appendChild(span);
+            console.log('✅ Inline script: Asterisk added!');
+        }
+    }
+    
+    // Try immediately
+    addAsteriskNow();
+    
+    // Try on DOMContentLoaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addAsteriskNow);
+    }
+    
+    // Try multiple times
+    setTimeout(addAsteriskNow, 50);
+    setTimeout(addAsteriskNow, 200);
+    setTimeout(addAsteriskNow, 500);
+})();
+</script>
+{% endblock %}

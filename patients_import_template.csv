@@ -1,0 +1,5 @@
+Full Name,Phone Number,Email,Date of Birth,Gender,Assigned Doctor ID,Address,Medical Notes,Referring Doctor
+John Doe,+1234567890,john@example.com,1990-01-15,MALE,4,123 Main St,No known allergies,Dr. Smith
+Jane Smith,+0987654321,jane@example.com,1985-05-20,FEMALE,4,456 Oak Ave,Type 2 Diabetes,Dr. Johnson
+Bob Wilson,+1122334455,bob@example.com,1978-11-30,MALE,5,789 Pine Rd,Hypertension,Dr. Brown
+Alice Davis,+5566778899,alice@example.com,1992-03-10,FEMALE,5,321 Elm St,Asthma,Dr. White

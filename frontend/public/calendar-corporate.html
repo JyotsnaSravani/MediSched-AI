@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - MediSched AI</title>
+    <link rel="stylesheet" href="/styles/corporate-theme.css">
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+        }
+        
+        .date-picker-container {
+            background: white;
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--space-6);
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+        
+        .date-picker-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--space-6);
+        }
+        
+        .slot-card {
+            background: white;
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            border-left: 4px solid var(--primary-600);
+            transition: all var(--transition-base);
+        }
+        
+        .slot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .slot-card.booked {
+            border-left-color: var(--warning);
+            opacity: 0.7;
+        }
+        
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-4);
+        }
+        
+        .slot-doctor {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+        
+        .slot-specialization {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+        }
+        
+        .slot-details {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+            margin-bottom: var(--space-4);
+        }
+        
+        .slot-detail-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--text-sm);
+            color: var(--gray-700);
+        }
+        
+        .slot-detail-icon {
+            font-size: var(--text-base);
+        }
+        
+        .slot-actions {
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--space-12);
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: var(--space-4);
+        }
+        
+        .empty-state-title {
+            font-size: var(--text-2xl);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+        
+        .empty-state-text {
+            color: var(--gray-600);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: var(--z-modal);
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: var(--text-2xl);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: var(--text-2xl);
+            color: var(--gray-600);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        
+        .modal-close:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+        
+        .modal-body {
+            padding: var(--space-6);
+        }
+        
+        .modal-footer {
+            padding: var(--space-6);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: var(--space-3);
+            justify-content: flex-end);
+        }
+        
+        .booking-summary {
+            background: var(--gray-50);
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-4);
+        }
+        
+        .booking-summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--space-2) 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .booking-summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .booking-summary-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .booking-summary-value {
+            color: var(--gray-900);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏥</div>
+                <div>
+                    <h1 class="sidebar-title">MediSched</h1>
+                    <p class="sidebar-subtitle">AI-Powered Scheduling</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard-corporate.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/calendar-corporate.html" class="nav-item active">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/appointments-corporate.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Appointments</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="/patients-corporate.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span>Patients</span>
+                </a>
+                <a href="/doctors-corporate.html" class="nav-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Doctors</span>
+                </a>
+                <a href="/slots-corporate.html" class="nav-item">
+                    <span class="nav-icon">🕐</span>
+                    <span>Availability</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Communication</div>
+                <a href="/call-logs-corporate.html" class="nav-item">
+                    <span class="nav-icon">📞</span>
+                    <span>Call Logs</span>
+                </a>
+                <a href="/reminders-corporate.html" class="nav-item">
+                    <span class="nav-icon">📧</span>
+                    <span>Reminders</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/analytics-corporate.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h2 class="top-bar-title">Calendar</h2>
+            <div class="top-bar-actions">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="page-header">
+                <div>
+                    <h3 style="margin-bottom: var(--space-2);">Appointment Calendar</h3>
+                    <p style="color: var(--gray-600); margin: 0;">View available slots and scheduled appointments</p>
+                </div>
+            </div>
+            
+            <div class="date-picker-container">
+                <span class="date-picker-label">📅 Select Date:</span>
+                <input 
+                    type="date" 
+                    id="dateInput" 
+                    class="form-input" 
+                    style="max-width: 200px;"
+                    onchange="loadSlots()"
+                >
+            </div>
+            
+            <div id="slotsContainer">
+                <div class="loading" style="text-align: center; padding: var(--space-12); color: var(--gray-600);">
+                    Loading slots...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Book Appointment Modal -->
+    <div id="bookAppointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Book Appointment</h3>
+                <button class="modal-close" onclick="closeBookingModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="booking-summary" id="bookingSummary">
+                    <!-- Will be populated dynamically -->
+                </div>
+                
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label class="form-label form-label-required">Select Patient</label>
+                        <select id="bookingPatient" class="form-select" required>
+                            <option value="">Choose a patient...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Notes (Optional)</label>
+                        <textarea id="bookingNotes" class="form-input" rows="3" placeholder="Reason for visit or special notes..."></textarea>
+                    </div>
+                    
+                    <div id="bookingMessage"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeBookingModal()">Cancel</button>
+                <button class="btn btn-primary" id="submitBookingBtn" onclick="submitBooking()">
+                    <span>📅</span>
+                    <span>Book Appointment</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const token = localStorage.getItem('access_token');
+        const user = localStorage.getItem('user');
+        
+        if (!token) {
+            window.location.href = '/login-corporate.html';
+        } else {
+            if (user) {
+                const userData = JSON.parse(user);
+                const firstName = userData.email.split('@')[0].split('.')[0];
+                const initials = firstName.substring(0, 2).toUpperCase();
+                
+                document.getElementById('userName').textContent = userData.email;
+                document.getElementById('userRole').textContent = userData.role;
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+        
+        // Set today's date as default
+        document.getElementById('dateInput').valueAsDate = new Date();
+        
+        async function loadSlots() {
+            const date = document.getElementById('dateInput').value;
+            document.getElementById('slotsContainer').innerHTML = '<div style="text-align: center; padding: var(--space-12); color: var(--gray-600);">Loading slots...</div>';
+            
+            try {
+                // Get all doctors first
+                const doctorsResponse = await authenticatedFetch('http://127.0.0.1:8000/api/v1/doctors/');
+                
+                if (!doctorsResponse.ok) throw new Error('Failed to fetch doctors');
+                const doctorsData = await doctorsResponse.json();
+                const doctors = doctorsData.results || doctorsData;
+                
+                // Get slots for each doctor
+                let allSlots = [];
+                for (const doctor of doctors) {
+                    try {
+                        const slotsResponse = await authenticatedFetch(`http://127.0.0.1:8000/api/v1/doctors/${doctor.id}/slots/?slot_date=${date}`);
+                        if (slotsResponse.ok) {
+                            const slotsData = await slotsResponse.json();
+                            const slots = slotsData.results || slotsData;
+                            allSlots = allSlots.concat(slots.map(s => ({
+                                ...s, 
+                                doctor_full_name: doctor.full_name,
+                                doctor_spec: doctor.specialization
+                            })));
+                        }
+                    } catch (e) {
+                        console.error(`Error loading slots for doctor ${doctor.id}:`, e);
+                    }
+                }
+                
+                if (allSlots.length === 0) {
+                    document.getElementById('slotsContainer').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📅</div>
+                            <h3 class="empty-state-title">No Slots Available</h3>
+                            <p class="empty-state-text">No appointment slots found for ${date}. Try selecting a different date.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                displaySlots(allSlots);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('slotsContainer').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Error Loading Slots</div>
+                            <p class="alert-message">${error.message}. Please check if the backend is running and you are logged in.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function displaySlots(slots) {
+            const getStatusBadge = (status) => {
+                const badges = {
+                    'PENDING': 'warning',
+                    'CONFIRMED': 'success',
+                    'CANCELLED': 'danger',
+                    'COMPLETED': 'info',
+                    'NO_SHOW': 'danger'
+                };
+                return badges[status] || 'info';
+            };
+            
+            const html = `
+                <div class="slots-grid">
+                    ${slots.map(s => `
+                        <div class="slot-card ${s.status !== 'AVAILABLE' ? 'booked' : ''}">
+                            <div class="slot-header">
+                                <div>
+                                    <div class="slot-doctor">Dr. ${s.doctor_full_name}</div>
+                                    <div class="slot-specialization">${s.doctor_spec}</div>
+                                </div>
+                                <span class="badge badge-${s.status === 'AVAILABLE' ? 'success' : 'warning'}">
+                                    ${s.status_display || s.status}
+                                </span>
+                            </div>
+                            <div class="slot-details">
+                                <div class="slot-detail-item">
+                                    <span class="slot-detail-icon">⏰</span>
+                                    <span>${s.start_time.substring(0,5)} - ${s.end_time.substring(0,5)}</span>
+                                </div>
+                                <div class="slot-detail-item">
+                                    <span class="slot-detail-icon">📅</span>
+                                    <span>${s.slot_date}</span>
+                                </div>
+                                <div class="slot-detail-item">
+                                    <span class="slot-detail-icon">⏱️</span>
+                                    <span>${s.duration_display || s.duration + ' min'}</span>
+                                </div>
+                                ${s.patient_name ? `
+                                    <div class="slot-detail-item">
+                                        <span class="slot-detail-icon">👤</span>
+                                        <span>${s.patient_name}</span>
+                                    </div>
+                                ` : ''}
+                                ${s.appointment_status ? `
+                                    <div class="slot-detail-item">
+                                        <span class="slot-detail-icon">📋</span>
+                                        <span class="badge badge-${getStatusBadge(s.appointment_status)}">${s.appointment_status}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            ${s.status === 'AVAILABLE' ? `
+                                <div class="slot-actions">
+                                    <button class="btn btn-primary btn-sm" style="width: 100%;" onclick='openBookingModal(${JSON.stringify(s)})'>
+                                        <span>📅</span>
+                                        <span>Book Appointment</span>
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="slot-actions">
+                                    <button class="btn btn-outline btn-sm" style="width: 100%;" disabled>
+                                        <span>🚫</span>
+                                        <span>Not Available</span>
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('slotsContainer').innerHTML = html;
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login-corporate.html';
+            }
+        }
+        
+        loadSlots();
+        loadPatientsForBooking();
+        console.log('✅ Corporate calendar page loaded');
+        
+        // Booking Modal Functions
+        let selectedSlot = null;
+        
+        async function loadPatientsForBooking() {
+            try {
+                const response = await authenticatedFetch('http://127.0.0.1:8000/api/v1/patients/');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const patients = data.results || data;
+                    
+                    const options = patients.map(p => 
+                        `<option value="${p.id}">${p.full_name} - ${p.phone_number}</option>`
+                    ).join('');
+                    
+                    document.getElementById('bookingPatient').innerHTML = '<option value="">Choose a patient...</option>' + options;
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        function openBookingModal(slot) {
+            selectedSlot = slot;
+            
+            // Populate booking summary
+            document.getElementById('bookingSummary').innerHTML = `
+                <div class="booking-summary-item">
+                    <span class="booking-summary-label">Doctor:</span>
+                    <span class="booking-summary-value">Dr. ${slot.doctor_full_name}</span>
+                </div>
+                <div class="booking-summary-item">
+                    <span class="booking-summary-label">Specialization:</span>
+                    <span class="booking-summary-value">${slot.doctor_spec}</span>
+                </div>
+                <div class="booking-summary-item">
+                    <span class="booking-summary-label">Date:</span>
+                    <span class="booking-summary-value">${slot.slot_date}</span>
+                </div>
+                <div class="booking-summary-item">
+                    <span class="booking-summary-label">Time:</span>
+                    <span class="booking-summary-value">${slot.start_time.substring(0,5)} - ${slot.end_time.substring(0,5)}</span>
+                </div>
+                <div class="booking-summary-item">
+                    <span class="booking-summary-label">Duration:</span>
+                    <span class="booking-summary-value">${slot.duration} minutes</span>
+                </div>
+            `;
+            
+            document.getElementById('bookAppointmentModal').classList.add('active');
+        }
+        
+        function closeBookingModal() {
+            document.getElementById('bookAppointmentModal').classList.remove('active');
+            document.getElementById('bookingForm').reset();
+            document.getElementById('bookingMessage').innerHTML = '';
+            selectedSlot = null;
+        }
+        
+        async function submitBooking() {
+            const submitBtn = document.getElementById('submitBookingBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>⏳</span><span>Booking...</span>';
+            
+            const patientId = document.getElementById('bookingPatient').value;
+            const notes = document.getElementById('bookingNotes').value.trim();
+            
+            if (!patientId) {
+                document.getElementById('bookingMessage').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <p class="alert-message">Please select a patient</p>
+                        </div>
+                    </div>
+                `;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>📅</span><span>Book Appointment</span>';
+                return;
+            }
+            
+            try {
+                const payload = {
+                    patient: parseInt(patientId)
+                };
+                
+                if (notes) {
+                    payload.notes = notes;
+                }
+                
+                const url = `http://127.0.0.1:8000/api/v1/doctors/${selectedSlot.doctor}/slots/${selectedSlot.id}/book/`;
+                console.log('Booking URL:', url);
+                console.log('Payload:', payload);
+                
+                const response = await authenticatedFetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                console.log('Response status:', response.status);
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`Server returned HTML instead of JSON (Status: ${response.status}). The booking endpoint may not exist or there's a server error.`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok || response.status === 201) {
+                    document.getElementById('bookingMessage').innerHTML = `
+                        <div class="alert alert-success">
+                            <div class="alert-icon">✅</div>
+                            <div class="alert-content">
+                                <p class="alert-message">Appointment booked successfully!</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        closeBookingModal();
+                        loadSlots(); // Refresh slots
+                    }, 1500);
+                } else {
+                    let errorMsg = 'Failed to book appointment';
+                    
+                    if (data.error && data.message) {
+                        errorMsg = `${data.error}: ${data.message}`;
+                    } else if (data.detail) {
+                        errorMsg = data.detail;
+                    } else if (data.message) {
+                        errorMsg = data.message;
+                    } else if (typeof data === 'object') {
+                        const errors = Object.entries(data).map(([field, msgs]) => {
+                            const msgArray = Array.isArray(msgs) ? msgs : [msgs];
+                            return `${field}: ${msgArray.join(', ')}`;
+                        }).join('; ');
+                        errorMsg = errors || errorMsg;
+                    }
+                    
+                    throw new Error(errorMsg);
+                }
+            } catch (error) {
+                console.error('Booking error:', error);
+                document.getElementById('bookingMessage').innerHTML = `
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">❌</div>
+                        <div class="alert-content">
+                            <p class="alert-message">${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>📅</span><span>Book Appointment</span>';
+            }
+        }
+    </script>
+</body>
+</html>
