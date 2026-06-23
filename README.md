@@ -4,7 +4,7 @@
 
 MediSched AI is an intelligent healthcare appointment automation platform designed to simplify patient scheduling and communication for hospitals, clinics, and healthcare providers. The system leverages Artificial Intelligence, Voice Automation, SMS Services, and Intelligent Scheduling to automate appointment booking, reminders, rescheduling, cancellations, and patient follow-ups.
 
-Built with React, Django REST Framework, PostgreSQL, Celery, Redis, Twilio, OpenAI GPT, and Whisper, the platform enables AI-powered voice conversations, real-time appointment management, automated notifications, call recording, and speech-to-text transcription. MediShield AI reduces administrative workload, minimizes missed appointments, improves patient engagement, and enhances overall operational efficiency in healthcare organizations.
+Built with React, Django REST Framework, PostgreSQL, Twilio, OpenAI GPT, and Whisper, the platform enables AI-powered voice conversations, real-time appointment management, automated notifications, call recording, and speech-to-text transcription. MediShield AI reduces administrative workload, minimizes missed appointments, improves patient engagement, and enhances overall operational efficiency in healthcare organizations.
 
 ### Key Features
 
@@ -24,7 +24,6 @@ Built with React, Django REST Framework, PostgreSQL, Celery, Redis, Twilio, Open
 * Backend: Django & Django REST Framework
 * Database: PostgreSQL
 * Task Queue: Celery
-* Message Broker: Redis
 * Communication: Twilio Voice & SMS
 * AI Engine: OpenAI GPT
 * Transcription: OpenAI Whisper
